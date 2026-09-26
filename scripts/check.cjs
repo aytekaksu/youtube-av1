@@ -6,6 +6,17 @@ const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const manifest = JSON.parse(read('manifest.json'));
+const pkg = JSON.parse(read('package.json'));
+assert.equal(manifest.version, pkg.version, 'package and extension versions must match');
+assert.equal(require('typescript/package.json').version, pkg.devDependencies.typescript);
+for (const file of ['src/background', 'src/force-av1', 'src/reset-av1', 'popup/popup']) {
+  assert.ok(fs.existsSync(path.join(root, `${file}.ts`)), `Missing TypeScript source: ${file}`);
+  // Content scripts must remain classic scripts: no module loader is available in MAIN.
+  new vm.Script(read(`${file}.js`), { filename: `${file}.js` });
+}
+for (const file of ['src/force-av1.js', 'src/reset-av1.js']) {
+  assert.ok(read(file).includes(`'${manifest.version}'`), `Stale compiled version: ${file}`);
+}
 assert.equal(manifest.manifest_version, 3);
 assert.match(manifest.version, /^\d+\.\d+\.\d+$/);
 assert.deepEqual(manifest.permissions, ['storage', 'scripting']);
@@ -30,7 +41,7 @@ for (const [size, file] of Object.entries(manifest.icons)) {
   assert.equal(png.readUInt32BE(16), Number(size));
   assert.equal(png.readUInt32BE(20), Number(size));
 }
-const docs = ['README.md', 'CONTRIBUTING.md', 'PRIVACY.md', 'NOTICE.md', 'docs/how-it-works.md'];
+const docs = ['README.md', 'CONTRIBUTING.md', 'PRIVACY.md', 'NOTICE.md'];
 for (const file of docs) {
   const text = read(file);
   const links = [...text.matchAll(/\]\(([^)]+)\)|(?:src|href)="([^"]+)"/g)];
@@ -44,4 +55,4 @@ for (const file of docs) {
 }
 assert.match(read('LICENSE'), /MIT License/);
 assert.match(read('.github/CODEOWNERS'), /^\* @aytekaksu$/m);
-console.log('PASS: source syntax, manifest, assets, icon sizes, documentation links, MIT license, and code owner.');
+console.log('PASS: compiled classic scripts, pinned compiler, versions, manifest, assets, documentation, license, and code owner.');

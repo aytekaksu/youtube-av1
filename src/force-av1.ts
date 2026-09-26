@@ -15,9 +15,9 @@
     enumerable: false,
     writable: false
   });
-  window.__forceYouTubeAv1Version = '0.2.1';
+  window.__forceYouTubeAv1Version = '0.2.0';
 
-  const isAv1VideoType = (type) => {
+  const isAv1VideoType = (type: unknown): boolean => {
     if (typeof type !== 'string') {
       return false;
     }
@@ -28,19 +28,23 @@
       /\bav0?1(?:\.|,|\s|["']|$)/.test(normalized);
   };
 
-  const isAv1MediaConfig = (configuration) => {
+  const isAv1MediaConfig = (configuration: MediaDecodingConfiguration): boolean => {
     return Boolean(configuration &&
       configuration.video &&
       isAv1VideoType(configuration.video.contentType));
   };
 
-  const patchValue = (target, property, replacementFactory) => {
+  const patchValue = <T extends object, K extends keyof T>(
+    target: T | undefined,
+    property: K,
+    replacementFactory: (original: T[K]) => T[K]
+  ): boolean => {
     if (!target || typeof target[property] !== 'function') {
       return false;
     }
 
     const original = target[property];
-    if (original.__forceYouTubeAv1Patched) {
+    if ('__forceYouTubeAv1Patched' in original && original.__forceYouTubeAv1Patched) {
       return true;
     }
 
@@ -78,7 +82,7 @@
 
   const forceStoredAv1Preference = () => {
     try {
-      // Migrate the persisted value from v0.1. New overrides stay page-local,
+      // Migrate the persisted value from the original prototype. New overrides stay page-local,
       // so switching off and reloading restores YouTube's normal behavior.
       if (window.localStorage.getItem(AV1_PREF_KEY) === AV1_PREF_ALWAYS) {
         window.localStorage.removeItem(AV1_PREF_KEY);
@@ -96,32 +100,34 @@
     const originalSetItem = storagePrototype.setItem;
 
     if (typeof originalGetItem === 'function') {
-      patchValue(storagePrototype, 'getItem', (original) => function getItem(key) {
+      patchValue(storagePrototype, 'getItem', (original) => function getItem(this: Storage, ...args: Parameters<Storage['getItem']>) {
+        const [key] = args;
         if (this === window.localStorage && key === AV1_PREF_KEY) {
           return AV1_PREF_ALWAYS;
         }
-        return original.apply(this, arguments);
+        return original.apply(this, args);
       });
     }
 
     if (typeof originalSetItem === 'function') {
-      patchValue(storagePrototype, 'setItem', (original) => function setItem(key, value) {
+      patchValue(storagePrototype, 'setItem', (original) => function setItem(this: Storage, ...args: Parameters<Storage['setItem']>) {
+        const [key] = args;
         if (this === window.localStorage && key === AV1_PREF_KEY) {
           return undefined;
         }
-        return original.apply(this, arguments);
+        return original.apply(this, args);
       });
     }
 
     try {
       Object.defineProperty(storagePrototype, AV1_PREF_KEY, {
-        get() {
+        get(this: Storage) {
           if (this === window.localStorage) {
             return AV1_PREF_ALWAYS;
           }
           return originalGetItem.call(this, AV1_PREF_KEY);
         },
-        set(value) {
+        set(this: Storage, value: string) {
           if (this === window.localStorage) {
             return;
           }
@@ -141,20 +147,22 @@
 
   const patchCanPlayType = () => {
     const prototype = window.HTMLMediaElement && window.HTMLMediaElement.prototype;
-    patchValue(prototype, 'canPlayType', (original) => function canPlayType(type) {
+    patchValue(prototype, 'canPlayType', (original) => function canPlayType(this: HTMLMediaElement, ...args: Parameters<HTMLMediaElement['canPlayType']>) {
+      const [type] = args;
       if (isAv1VideoType(type)) {
         return 'probably';
       }
-      return original.apply(this, arguments);
+      return original.apply(this, args);
     });
   };
 
-  const patchMediaSourceConstructor = (constructor) => {
-    patchValue(constructor, 'isTypeSupported', (original) => function isTypeSupported(type) {
+  const patchMediaSourceConstructor = (constructor: Pick<typeof MediaSource, 'isTypeSupported'> | undefined) => {
+    patchValue(constructor, 'isTypeSupported', (original) => function isTypeSupported(this: typeof constructor, ...args: Parameters<typeof MediaSource.isTypeSupported>) {
+      const [type] = args;
       if (isAv1VideoType(type)) {
         return true;
       }
-      return original.apply(this, arguments);
+      return original.apply(this, args);
     });
   };
 
@@ -169,9 +177,10 @@
       return;
     }
 
-    patchValue(mediaCapabilities, 'decodingInfo', (original) => function decodingInfo(configuration) {
+    patchValue(mediaCapabilities, 'decodingInfo', (original) => function decodingInfo(this: MediaCapabilities, ...args: Parameters<MediaCapabilities['decodingInfo']>) {
+      const [configuration] = args;
       if (!isAv1MediaConfig(configuration)) {
-        return original.apply(this, arguments);
+        return original.apply(this, args);
       }
 
       return Promise.resolve({
