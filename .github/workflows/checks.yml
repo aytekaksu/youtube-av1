@@ -18,7 +18,6 @@ jobs:
         with:
           node-version: '24'
       - run: npm ci --ignore-scripts
-      - run: npm test
+      - run: npm run package
       - run: npx playwright install --with-deps chromium
       - run: npm run test:ui
-      - run: python3 scripts/package.py

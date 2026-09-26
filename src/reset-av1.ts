@@ -7,5 +7,5 @@
       window.localStorage.removeItem('yt-player-av1-pref');
     }
   } catch (_) { /* Storage may be unavailable in embedded players. */ }
-  window.__forceYouTubeAv1Version = '0.2.0';
+  window.__forceYouTubeAv1Version = '0.2.1';
 }());
