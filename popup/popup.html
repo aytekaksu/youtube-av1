@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>YouTube AV1</title>
+  <link rel="stylesheet" href="popup.css">
+  <script src="popup.js" defer></script>
+</head>
+<body>
+  <main>
+    <header class="brand">
+      <img src="../assets/logo.svg" width="48" height="48" alt="">
+      <h1>YouTube <span>AV1</span></h1>
+    </header>
+    <div class="setting">
+      <label for="enabled">Prefer AV1</label>
+      <label class="switch">
+        <input id="enabled" type="checkbox" role="switch" disabled>
+        <span class="switch-track" aria-hidden="true"></span>
+      </label>
+    </div>
+    <button id="apply" type="button" disabled>Reload YouTube</button>
+    <p id="message" role="status" aria-live="polite" hidden></p>
+  </main>
+</body>
+</html>
