@@ -15,7 +15,7 @@
     enumerable: false,
     writable: false
   });
-  window.__forceYouTubeAv1Version = '0.2.1';
+  window.__forceYouTubeAv1Version = '0.1.0';
 
   const isAv1VideoType = (type) => {
     if (typeof type !== 'string') {
@@ -78,7 +78,7 @@
 
   const forceStoredAv1Preference = () => {
     try {
-      // Migrate the persisted value from v0.1. New overrides stay page-local,
+      // Migrate the persisted value from the original prototype. New overrides stay page-local,
       // so switching off and reloading restores YouTube's normal behavior.
       if (window.localStorage.getItem(AV1_PREF_KEY) === AV1_PREF_ALWAYS) {
         window.localStorage.removeItem(AV1_PREF_KEY);

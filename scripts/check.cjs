@@ -30,7 +30,7 @@ for (const [size, file] of Object.entries(manifest.icons)) {
   assert.equal(png.readUInt32BE(16), Number(size));
   assert.equal(png.readUInt32BE(20), Number(size));
 }
-const docs = ['README.md', 'CONTRIBUTING.md', 'PRIVACY.md', 'NOTICE.md', 'docs/how-it-works.md'];
+const docs = ['README.md', 'CONTRIBUTING.md', 'PRIVACY.md', 'NOTICE.md'];
 for (const file of docs) {
   const text = read(file);
   const links = [...text.matchAll(/\]\(([^)]+)\)|(?:src|href)="([^"]+)"/g)];

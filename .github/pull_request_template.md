@@ -1,15 +1,10 @@
 ## Change
 
-What does this change for the user, and why?
+Describe the user-visible change.
 
 ## Checks
 
-- [ ] `node scripts/check.cjs`
-- [ ] `node tests/behavior.cjs`
-- [ ] UI changes: `node tests/popup.cjs` and reviewed screenshots
+- [ ] Source and behavior checks pass
+- [ ] UI checked and screenshot updated, if applicable
 
-Describe any real-browser checks separately from simulated tests.
-
-## Owner review
-
-Leave this pull request unmerged until @aytekaksu explicitly approves it. Do not enable auto-merge or bypass branch protection.
+Leave unmerged until @aytekaksu explicitly approves. No auto-merge or protection bypass.

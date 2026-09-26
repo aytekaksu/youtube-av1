@@ -1,0 +1,13 @@
+Force YouTube AV1 — Quick start
+
+1. Unzip the download and keep the youtube-av1 folder.
+2. Open chrome://extensions (Chrome) or vivaldi://extensions (Vivaldi).
+3. Turn on Developer mode, click Load unpacked, and choose that folder.
+4. Open a YouTube video. Click the extension icon to turn Prefer AV1 on/off.
+5. After a change, click Reload to take effect.
+
+Prefer AV1 starts on. To check: right-click the video, choose Stats for nerds,
+and look for av01 under Codecs. If playback stutters, switch Prefer AV1 off.
+
+AV1 may save data or improve quality, but can use more CPU and battery.
+Project: https://github.com/aytekaksu/youtube-av1

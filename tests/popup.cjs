@@ -24,17 +24,20 @@ if(screenshots) fs.mkdirSync(path.join(root, 'docs/screenshots'),{recursive:true
  await page.goto(pathToFileURL(path.join(root,'popup/popup.html')).href);
  const ready=()=>page.waitForFunction(()=>!document.getElementById('enabled').disabled);
  await ready();
- assert.equal(await page.locator('body').innerText(),'YouTube AV1\nPrefer AV1\nReload YouTube');
+ assert.equal(await page.locator('body').innerText(),'YouTube AV1\nPrefer AV1\nReload to take effect');
  assert.equal(await page.locator('#apply').isDisabled(),true);
+ const centered = await page.locator('.brand').evaluate(row => {
+  const bounds = row.getBoundingClientRect();
+  const logo = row.querySelector('img').getBoundingClientRect();
+  const title = row.querySelector('h1').getBoundingClientRect();
+  return Math.abs((logo.left + title.right) / 2 - (bounds.left + bounds.right) / 2) < 1;
+ });
+ assert.ok(centered, 'logo and title must be centered as a group');
  if(screenshots) {
   await page.locator('body').screenshot({path:screenshotPath('popup-dark.png')});
-  await page.emulateMedia({colorScheme:'light'});
-  await page.locator('body').screenshot({path:screenshotPath('popup-light.png')});
-  await page.emulateMedia({colorScheme:'dark'});
  }
  await page.locator('#enabled').uncheck(); await ready();
  assert.equal(await page.locator('#apply').isEnabled(),true);
- if(screenshots) await page.locator('body').screenshot({path:screenshotPath('popup-pending.png')});
  await page.reload();await ready();
  assert.equal(await page.locator('#enabled').isChecked(),false);
  assert.equal(await page.locator('#apply').isEnabled(),true);
