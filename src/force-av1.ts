@@ -15,7 +15,7 @@
     enumerable: false,
     writable: false
   });
-  window.__forceYouTubeAv1Version = '0.2.0';
+  window.__forceYouTubeAv1Version = '0.2.1';
 
   const isAv1VideoType = (type: unknown): boolean => {
     if (typeof type !== 'string') {

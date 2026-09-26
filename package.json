@@ -1,20 +1,27 @@
 {
   "name": "youtube-av1",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
+  "type": "module",
   "description": "A small extension that makes YouTube prefer AV1.",
   "license": "MIT",
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "typecheck": "tsc --project tsconfig.json --noEmit",
-    "test": "npm run build && node scripts/check.cjs && node tests/behavior.cjs && node tests/popup-state.cjs",
-    "test:ui": "npm run build && node tests/popup.cjs",
-    "package": "npm test && python3 scripts/package.py"
+    "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.tools.json",
+    "test": "npm run build && npm run typecheck && node scripts/check.ts && node tests/behavior.ts && node tests/popup-state.ts",
+    "test:ui": "npm run build && node tests/popup.ts",
+    "package": "npm test && node scripts/package.ts",
+    "icons": "node scripts/icons.ts"
   },
   "devDependencies": {
     "@types/chrome": "0.3.0",
+    "@types/node": "24.19.0",
+    "fflate": "0.8.3",
     "playwright": "1.63.0",
+    "sharp": "0.35.4",
     "typescript": "7.0.2"
   }
 }
