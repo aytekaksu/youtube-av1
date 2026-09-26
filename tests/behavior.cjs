@@ -1,7 +1,7 @@
 const vm=require('node:vm');
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
-const root=require('node:path').resolve(__dirname, '..')+'/';
+const root=(process.env.AV1_EXTENSION_ROOT || require('node:path').resolve(__dirname, '..'))+'/';
 function sandbox(pref){
  const c=vm.createContext({console});
  vm.runInContext(`
@@ -49,5 +49,8 @@ function sandbox(pref){
  await Promise.all([send({type:'set-enabled',enabled:true}),send({type:'set-enabled',enabled:false}),send({type:'set-enabled',enabled:true})]);
  assert.equal(settings.enabled,true); assert.equal(registered[0].js[0],'src/force-av1.js');
  assert.equal(handler({type:'set-enabled',enabled:false},{id:'test',url:'https://www.youtube.com/',tab:{}},()=>{}),undefined);
+ assert.equal(handler(null,{id:'test',url:'chrome-extension://test/popup/popup.html'},()=>{}),undefined);
+ assert.equal((await send({type:'set-enabled',enabled:'false'})).ok,false);
+ assert.equal(settings.enabled,true,'invalid messages must not change the setting');
  console.log('PASS: codec patch passthrough, quoted/unquoted AV1, preference cleanup, no persistent forced value, idempotency, on/off registration, storage-failure rollback, rapid-toggle ordering, sender restriction. VM fixtures.');
 })();

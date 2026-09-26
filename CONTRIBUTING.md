@@ -1,24 +1,24 @@
 # Contributing
 
-Open an issue or a focused pull request. Include reproduction steps and your browser version. **Do not merge, enable auto-merge, or bypass protections without @aytekaksu's explicit approval.** GitHub does not allow self-approval.
+Open an issue or a focused pull request. Include reproduction steps and your browser version. **External contributions need @aytekaksu's approval before merging.** Owner-requested changes may be merged and released after checks pass.
 
-No build is needed. Load the folder as an unpacked extension. With Node.js 20+:
+With Node.js 24+ and Python 3:
 
 ```sh
-node scripts/check.cjs
-node tests/behavior.cjs
+npm ci
+npm test
+npm run package
 ```
 
-For UI checks and the README screenshot:
+TypeScript 7.0.2 is pinned. The build generates browser-ready `.js` files beside the `.ts` source; only TypeScript is committed. Load this folder after building, or use the ready ZIP in `work/packages/`.
+
+For browser tests (CI runs these too):
 
 ```sh
-npm install --no-save --package-lock=false playwright@1.62.1
 npx playwright install chromium
-node tests/popup.cjs --screenshots
+npm run test:ui
 ```
 
 Tests use simulated browser state; they do not measure data savings. `PLAYWRIGHT_CHROMIUM_EXECUTABLE` can select an existing test browser.
 
-Package a ready-to-load ZIP with `python3 scripts/package.py`. Export icons from the SVG with `node scripts/icons.cjs` after installing `sharp`.
-
-Keep changes small, refresh screenshots after UI changes, and never commit private data. Original code contributions use the MIT license; see [NOTICE.md](NOTICE.md) for artwork rights.
+Add `--screenshots` to `node tests/popup.cjs` to refresh the screenshot. Original code contributions use MIT; see [NOTICE.md](NOTICE.md) for artwork rights.

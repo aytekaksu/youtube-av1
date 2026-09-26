@@ -1,14 +1,20 @@
 'use strict';
 
-const toggle = document.getElementById('enabled');
-const reload = document.getElementById('apply');
-const message = document.getElementById('message');
-let enabled = true;
-let appliedEnabled = null;
-let changed = false;
-let tabId = null;
+function element<T extends HTMLElement>(id: string, constructor: new () => T): T {
+  const result = document.getElementById(id);
+  if (!(result instanceof constructor)) throw new Error(`Missing popup element: ${id}`);
+  return result;
+}
 
-function showError(text) {
+const toggle = element('enabled', HTMLInputElement);
+const reload = element('apply', HTMLButtonElement);
+const message = element('message', HTMLParagraphElement);
+let enabled = true;
+let appliedEnabled: boolean | null = null;
+let changed = false;
+let tabId: number | null = null;
+
+function showError(text: string) {
   message.textContent = text;
   message.hidden = !text;
 }
@@ -21,10 +27,16 @@ function render() {
   reload.title = tabId === null ? 'Open a YouTube tab to reload it' : '';
 }
 
-async function send(request) {
-  const response = await chrome.runtime.sendMessage(request);
-  if (!response?.ok) throw new Error(response?.error || 'Could not connect. Reopen the popup to try again.');
-  return response;
+async function send(request: SettingsRequest): Promise<Extract<SettingsResponse, { ok: true }>> {
+  const response: unknown = await chrome.runtime.sendMessage(request);
+  if (typeof response !== 'object' || response === null || !('ok' in response)) {
+    throw new Error('Could not connect. Reopen the popup to try again.');
+  }
+  if (response.ok !== true || !('enabled' in response) || typeof response.enabled !== 'boolean') {
+    throw new Error('error' in response && typeof response.error === 'string'
+      ? response.error : 'Could not connect. Reopen the popup to try again.');
+  }
+  return { ok: true, enabled: response.enabled };
 }
 
 async function inspectTab() {
@@ -34,6 +46,7 @@ async function inspectTab() {
   if (url.protocol !== 'https:' ||
       !['www.youtube.com', 'm.youtube.com', 'www.youtube-nocookie.com'].includes(url.hostname) ||
       (url.hostname === 'www.youtube.com' && url.pathname.startsWith('/live_chat'))) return;
+  if (typeof tab?.id !== 'number') return;
   tabId = tab.id;
   try {
     const [frame] = await chrome.scripting.executeScript({
@@ -52,7 +65,7 @@ toggle.addEventListener('change', async () => {
   try {
     ({ enabled } = await send({ type: 'set-enabled', enabled: toggle.checked }));
     changed = true;
-  } catch (error) { showError(error.message); }
+  } catch (error) { showError(error instanceof Error ? error.message : 'Could not save. Please try again.'); }
   render();
   toggle.disabled = false;
 });
@@ -80,5 +93,5 @@ reload.addEventListener('click', async () => {
     enabled = settings.enabled;
     render();
     toggle.disabled = false;
-  } catch (error) { showError(error.message); }
+  } catch (error) { showError(error instanceof Error ? error.message : 'Could not load settings. Reopen the popup.'); }
 })();

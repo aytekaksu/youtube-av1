@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Force YouTube AV1",
   "description": "Makes YouTube prefer AV1 streams by advertising AV1 software decoding support to the player.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "minimum_chrome_version": "111",
   "permissions": [
     "storage",

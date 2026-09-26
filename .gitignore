@@ -1,6 +1,9 @@
 .DS_Store
 .codegraph
 node_modules/
+# Browser-ready output from TypeScript; rebuild with npm run build.
+src/*.js
+popup/*.js
 playwright-report/
 test-results/
 work/
